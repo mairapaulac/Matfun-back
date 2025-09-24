@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  userId          Int @id @default(autoincrement())
+  nome            String @unique //por padrão é NN, se fosse "String?" significaria que o campo poderia ser nulo.
+  email           String @unique
+  dataNascimento  DateTime      //mapeia para timestamp no postgresql, e os valores que contém o tipo DateTime são tratados como o objeto date no javascript
+  senha           String @db.VarChar(255)
+  //class           Class   @relation(fields: [classId], references: [classId])
+  classId         Int
+  createdAt       DateTime
+}
+
+model Class {
+  classId         Int @id @default(autoincrement())
+}
