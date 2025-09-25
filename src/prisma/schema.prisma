@@ -14,6 +14,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//Criando um enum como um tipo separado, depois disso podemos utilizá-lo como tipo no campo periodo na tabela ranking
+
+enum RankingPeriod {
+  DIARIO
+  SEMANAL
+  MENSAL
+  GERAL
+}
+
 
 model User {
   userId          Int     @id @default(autoincrement())
@@ -25,6 +34,8 @@ model User {
   classId         Int     //Campo escalar para a relação
   class           Class   @relation(fields: [classId], references: [classId])
   achievements    userAchievements[] // 1 user - N userAchievements
+  ranking         Ranking[]
+  stats           userStats?
 }
 
 model Class {
@@ -70,9 +81,22 @@ model userAchievements {
 }
 
 model userStats {
-
+  totalScore              Int
+  correctQuestions        Int
+  answeredQuestions       Int
+  consecutiveLoginDays    Int
+  algebraCorrectAnswers   Int
+  geometryCorrectAnswers  Int
+  lastLogin               DateTime 
+  userId                  Int  @unique
+  user                    User @relation(fields: [userId], references: [userId])
 }
 
-model ranking {
-
+model Ranking {
+  rankingId     Int @id @default(autoincrement())
+  userId        Int
+  score         Int
+  referenceDate DateTime @db.Date
+  period        RankingPeriod   
+  user          User @relation(fields: [userId], references: [userId])
 }
