@@ -16,16 +16,63 @@ datasource db {
 
 
 model User {
-  userId          Int @id @default(autoincrement())
-  nome            String @unique //por padrão é NN, se fosse "String?" significaria que o campo poderia ser nulo.
-  email           String @unique
+  userId          Int     @id @default(autoincrement())
+  name            String  @unique //por padrão é NN, se fosse "String?" significaria que o campo poderia ser nulo.
+  email           String  @unique
   dataNascimento  DateTime      //mapeia para timestamp no postgresql, e os valores que contém o tipo DateTime são tratados como o objeto date no javascript
-  senha           String @db.VarChar(255)
-  //class           Class   @relation(fields: [classId], references: [classId])
-  classId         Int
+  senha           String  @db.VarChar(255)
   createdAt       DateTime
+  classId         Int     //Campo escalar para a relação
+  class           Class   @relation(fields: [classId], references: [classId])
+  achievements    userAchievements[] // 1 user - N userAchievements
 }
 
 model Class {
-  classId         Int @id @default(autoincrement())
+  classId         Int    @id 
+  classLetter     String @db.Char(1)
+  gradeId         Int
+  users           User[] // 1 turma -> N usuários
+  grade           Grade  @relation(fields: [gradeId], references: [gradeId])
+}   
+
+model Grade {
+  gradeId         Int    @id
+  gradeName       String
+  schoolId        Int
+  class           Class[] // 1 ano -> N turmas
+  school          School @relation(fields: [schoolId], references: [schoolId]) //Uma escola tem vários anos, preciso saber se esse ano pertence a uma escola X
+} 
+
+model School {
+  schoolId        Int @id
+  school_name     String
+  grade           Grade[] // 1 escola - N anos
+}
+
+model Achievement {
+  achievementId           Int    @id 
+  achievementName         String @db.VarChar(30)
+  achievementIcon         String @db.VarChar(255)
+  requiredStat            String @db.VarChar(50)
+  achievementDescription  String
+  requiredValue           Int
+
+  users                   userAchievements[]
+}
+
+model userAchievements {
+  userAchievementId   Int @id @default(autoincrement())
+  unlockedAt          DateTime @default(now())
+  achievementId       Int
+  userId              Int
+  achievement         Achievement @relation(fields: [achievementId], references: [achievementId])
+  user                User @relation(fields: [userId], references: [userId])
+}
+
+model userStats {
+
+}
+
+model ranking {
+
 }
