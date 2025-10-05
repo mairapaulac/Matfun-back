@@ -13,6 +13,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//Criando um enum como um tipo separado, depois disso podemos utilizá-lo como tipo no campo periodo na tabela ranking
+
+enum RankingPeriod {
+  DIARIO
+  SEMANAL
+  MENSAL  
+  GERAL
+}
+
 
 enum RankingPeriod {
   DIARIO
@@ -22,14 +31,14 @@ enum RankingPeriod {
 }
 
 model User {
-  userId          Int     @id @default(autoincrement())
-  name            String  @unique //por padrão é NN, se fosse "String?" significaria que o campo poderia ser nulo.
-  email           String  @unique
+  userId          Int      @id @default(autoincrement())
+  name            String   @unique //por padrão é NN, se fosse "String?" significaria que o campo poderia ser nulo.
+  email           String   @unique
   dataNascimento  DateTime      //mapeia para timestamp no postgresql, e os valores que contém o tipo DateTime são tratados como o objeto date no javascript
-  senha           String  @db.VarChar(255)
-  createdAt       DateTime
+  senha           String   @db.VarChar(255)
+  createdAt       DateTime @default(now())
   classId         Int     //Campo escalar para a relação
-  class           Class   @relation(fields: [classId], references: [classId])
+  class           Class    @relation(fields: [classId], references: [classId])
   achievements    userAchievements[] // 1 user - N userAchievements
   stats           UserStats? // Relação 1-para-1 com UserStats
   matches         Match[]    // Relação 1-para-N com Match

@@ -2,14 +2,17 @@
 // e simplificar a importação de funcionalidades relacionadas.
 
 import express from "express";
+import dotenv from "dotenv";
 import { prisma } from "../src/prisma/client.js"
+
+dotenv.config();
 
 const app = express();
 
 app.use(express.json());
 
-//Exemplo
-app.get("/users", async (req, res) => {
-  const users = await prisma.user.findMany();
-  res.json(users);
-});
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
+})
