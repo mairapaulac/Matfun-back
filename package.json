@@ -13,9 +13,6 @@
   "author": "",
   "license": "ISC",
   "type": "module",
-  "prisma": {
-    "seed": "node src/prisma/seed.js"
-  },
   "dependencies": {
     "@prisma/client": "^6.16.2",
     "bcrypt": "^6.0.0",
