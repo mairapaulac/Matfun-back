@@ -5,10 +5,20 @@ import { prisma } from "../prisma/client.js"
 
 export class userRepository {
 
-    async findByEmail(email: String) {
-        return prisma.user.findUnique({ 
+    async findByEmail(email: string) {
+        return await prisma.user.findUnique({ 
             where: { email },
-            include: { stats: true} //traz as estatísticas junto se for preciso
+            include: { stats: true, achievements: true, matches: true, ranking: true} //traz as estatísticas junto se for preciso
+        });
+    }
+
+    async findAllUsers() {
+        return await prisma.user.findMany()
+    }
+    
+    async findByClass(classId: number) {
+        return await prisma.user.findMany({
+            where: { classId }
         });
     }
 
@@ -19,18 +29,17 @@ export class userRepository {
         dataNascimento: Date;
         classId: number;
     }) {
-        return prisma.user.create({
+        return await prisma.user.create({
             data: {
                 ...data,
                 stats: {
                     create: {
                         totalScore: 0,
-                        correctQuestions: 0,
-                        answeredQuestions: 0,
-                        consecutiveLoginDays: 0,
-                        algebraCorrectAnswers: 0,
-                        geometryCorretctAnswers: 0,
-                        lastLogin: new Date(),
+                        totalCorrect: 0,
+                        loginStreak: 0,
+                        algebraCorrect: 0,
+                        geometryCorrect: 0,
+                        lastLoginDate: new Date(),
                     },
                 },
             },
@@ -39,18 +48,17 @@ export class userRepository {
     }
 
     async updateLastLogin(userId: number) { 
-        return prisma.userStats.upsert({
+        return await prisma.userStats.upsert({
             where: { userId },
-            update: {lastLogin: new Date() },
+            update: {lastLoginDate: new Date() },
             create: {
                 userId,
                 totalScore: 0,
-                correctQuestions: 0,
-                answeredQuestions: 0,
-                consecutiveLoginDays: 0,
-                algebraCorrectAnswers: 0,
-                geometryCorrectAnswers: 0,
-                lastLogin: new Date(),
+                totalCorrect: 0,
+                loginStreak: 0,
+                algebraCorrect: 0,
+                geometryCorrect: 0,
+                lastLoginDate: new Date(),
             },
         });
     }

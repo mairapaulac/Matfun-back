@@ -2,10 +2,30 @@
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { userRepository } from "../repositories/userRepository.js"
+import { comparePassword, hashPassword } from "../utils/hash.js";
 
-const SECRET = process.env.JWT_SECRET as string;
-const EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1h";
+const UserRepository = new userRepository();
 
-export function generateToken(userId: number) {
-    return jwt.sign({ userId }, SECRET, { expiresIn: EXPIRES_IN });
+
+
+export class AuthService {
+
+    async register(data: {
+        name: string;
+        email: string;
+        senha: string;
+        dataNascimento: Date;
+        classId: number;
+    }) {
+        const hashedPassword = await hashPassword(data.senha);
+
+
+        const user = await UserRepository.createUser({
+            ...data,
+            senha: hashedPassword
+        })
+
+
+    }
 }
+
