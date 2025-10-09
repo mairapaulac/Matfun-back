@@ -3,13 +3,13 @@
 
 import express from "express";
 import dotenv from "dotenv";
-import authRoutes from "../src/auth/authRoutes.js"
+import rankingRoutes from "./routes/rankingRoutes.js";
 
 dotenv.config();
 const app = express();
 app.use(express.json());
 
-app.use(authRoutes);
+app.use('/api', rankingRoutes);
 
 const PORT = process.env.PORT || 3000;
 
