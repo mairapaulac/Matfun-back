@@ -3,13 +3,13 @@
 
 import express from "express";
 import dotenv from "dotenv";
-import { prisma } from "../src/prisma/client.js"
+import authRoutes from "../src/auth/authRoutes.js"
 
 dotenv.config();
-
 const app = express();
-
 app.use(express.json());
+
+app.use(authRoutes);
 
 const PORT = process.env.PORT || 3000;
 

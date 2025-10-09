@@ -1,12 +1,10 @@
 //Lógica de autenticação
-import bcrypt from "bcrypt"
-import jwt from "jsonwebtoken"
+
 import { userRepository } from "../repositories/userRepository.js"
 import { comparePassword, hashPassword } from "../utils/hash.js";
+import { generateToken } from "../utils/jwt.js";
 
 const UserRepository = new userRepository();
-
-
 
 export class AuthService {
 
@@ -17,6 +15,7 @@ export class AuthService {
         dataNascimento: Date;
         classId: number;
     }) {
+
         const hashedPassword = await hashPassword(data.senha);
 
 
@@ -25,7 +24,29 @@ export class AuthService {
             senha: hashedPassword
         })
 
+        //gera token jwt 
+        const token = generateToken(user.userId);
 
+        return { token, user };
+    }
+
+    async login(email: string, senha: string) {
+        const user = await UserRepository.findByEmail(email);
+
+        if (!user) 
+            throw new Error("Usuário não encontrado!");
+
+        const validPassword = await comparePassword(senha, user.senha);
+
+        if (!validPassword)
+            throw new Error("Senha incorreta!");
+
+
+        await UserRepository.updateLastLogin(user.userId);
+
+        const token = generateToken(user.userId);
+
+        return { token, user };
     }
 }
 
