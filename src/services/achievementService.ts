@@ -12,7 +12,6 @@ export class AchievementService {
         return await achievementRepository.findByUserId(userId);
     }
 
-
     async unlockAchievement(userId: number, achievementId: number) {
         //Verifica se a conquista já foi desbloqueada
         const existingUsr = await achievementRepository.findByUserId(userId);

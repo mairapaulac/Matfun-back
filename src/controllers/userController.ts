@@ -43,7 +43,7 @@ export class UserController {
 
   async getProfile(req: Request, res: Response) {
     try {
-      const userId = (req as any).userId;
+      const userId = (req as any).user.userId;
       const user = await userService.getUserById(userId);
       return res.json(user);
     } catch (error) {

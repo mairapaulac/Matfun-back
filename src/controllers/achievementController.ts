@@ -17,7 +17,7 @@ export class AchievementController {
 
     async getUserAchievements(req: Request, res: Response) {
         try {
-            const userId = (req as any).userId;
+            const userId = (req as any).user.userId;
             const userAchievements = await achievementService.getUserAchievements(userId);
             return res.status(200).json(userAchievements);
         } catch (err: any) {

@@ -58,6 +58,7 @@ model School {
   school_name     String
   grade           Grade[] // 1 escola - N anos
 }
+
 model Achievement {
   achievementId           Int    @id 
   achievementName         String @db.VarChar(30)
@@ -93,6 +94,7 @@ model UserStats {
   loginStreak      Int      @default(0)
   lastLoginDate    DateTime? @db.Date // O '?' permite que seja nulo e @db.Date mapeia para o tipo DATE
 }
+
 model Match {
   matchId            Int      @id @default(autoincrement())
   scoreGained        Int

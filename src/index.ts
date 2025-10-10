@@ -8,6 +8,7 @@ import achievementRoutes from "./routes/achievementRoutes.js"
 import userRoutes from "./routes/userRoutes.js"
 
 
+
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use('/ranking', rankingRoutes);
 app.use('/achievements', achievementRoutes);
 app.use('/user', userRoutes)
+//app.use(dashboardRoutes);
 
 const PORT = process.env.PORT || 3000;
 
