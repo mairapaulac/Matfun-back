@@ -4,12 +4,17 @@
 import express from "express";
 import dotenv from "dotenv";
 import rankingRoutes from "./routes/rankingRoutes.js";
+import achievementRoutes from "./routes/achievementRoutes.js"
+import userRoutes from "./routes/userRoutes.js"
+
 
 dotenv.config();
 const app = express();
 app.use(express.json());
 
-app.use('/api', rankingRoutes);
+app.use('/ranking', rankingRoutes);
+app.use('/achievements', achievementRoutes);
+app.use('/user', userRoutes)
 
 const PORT = process.env.PORT || 3000;
 

@@ -3,21 +3,31 @@
 import { prisma } from "../prisma/client.js"
 
 
-export class userRepository {
+export class UserRepository {
 
     async findByEmail(email: string) {
-        return await prisma.user.findUnique({ 
+        return prisma.user.findUnique({ 
             where: { email },
             include: { stats: true, achievements: true, matches: true, ranking: true} //traz as estatísticas junto se for preciso
         });
     }
 
+    async findById(userId: number) {
+        return prisma.user.findUnique( {
+            where: { userId },
+            select: { 
+                name: true,
+                email: true, 
+            },
+        });
+    }
+
     async findAllUsers() {
-        return await prisma.user.findMany()
+        return prisma.user.findMany()
     }
     
     async findByClass(classId: number) {
-        return await prisma.user.findMany({
+        return prisma.user.findMany({
             where: { classId }
         });
     }
@@ -29,7 +39,7 @@ export class userRepository {
         dataNascimento: Date;
         classId: number;
     }) {
-        return await prisma.user.create({
+        return prisma.user.create({
             data: {
                 ...data,
                 stats: {
@@ -47,8 +57,11 @@ export class userRepository {
         });
     }
 
+
+    //Depois usar a tabela userStats, para que ela sempre exista após o cadastro
+
     async updateLastLogin(userId: number) { 
-        return await prisma.userStats.upsert({
+        return prisma.userStats.upsert({
             where: { userId },
             update: {lastLoginDate: new Date() },
             create: {
