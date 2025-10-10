@@ -6,7 +6,8 @@ import dotenv from "dotenv";
 import rankingRoutes from "./routes/rankingRoutes.js";
 import achievementRoutes from "./routes/achievementRoutes.js"
 import userRoutes from "./routes/userRoutes.js"
-
+import dashboardRoutes from "./routes/dashboardRoutes.js"
+import supportRoutes from "./routes/supportRoutes.js"
 
 
 dotenv.config();
@@ -15,8 +16,9 @@ app.use(express.json());
 
 app.use('/ranking', rankingRoutes);
 app.use('/achievements', achievementRoutes);
-app.use('/user', userRoutes)
-//app.use(dashboardRoutes);
+app.use('/user', userRoutes);
+app.use(dashboardRoutes);
+app.use('/support');
 
 const PORT = process.env.PORT || 3000;
 

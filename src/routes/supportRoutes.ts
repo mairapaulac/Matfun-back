@@ -8,4 +8,4 @@ router.get("/escolas", supportController.getAllSchools);
 router.get("/escolas/:id/anos", supportController.getGradesBySchool);
 router.get("/anos/:id/turmas", supportController.getClassesByGrade);
 
-export { router as supportRoutes };
+export default router;
