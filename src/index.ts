@@ -3,22 +3,25 @@
 
 import express from "express";
 import dotenv from "dotenv";
-import rankingRoutes from "./routes/rankingRoutes.js";
+// import rankingRoutes from "./routes/rankingRoutes.js";
 import achievementRoutes from "./routes/achievementRoutes.js"
 import userRoutes from "./routes/userRoutes.js"
 import dashboardRoutes from "./routes/dashboardRoutes.js"
 import supportRoutes from "./routes/supportRoutes.js"
+import matchRoutes from "./routes/matchRoutes.js";
+import authRoutes from "./auth/authRoutes.js";
 
 
 dotenv.config();
 const app = express();
 app.use(express.json());
 
-app.use('/ranking', rankingRoutes);
-app.use('/achievements', achievementRoutes);
-app.use('/user', userRoutes);
-app.use(dashboardRoutes);
-app.use('/support');
+app.use("/auth", authRoutes);
+app.use("/user", userRoutes);
+app.use("/achievements", achievementRoutes);
+app.use("/matches", matchRoutes);
+app.use("/dashboard", dashboardRoutes);
+app.use("/support", supportRoutes)
 
 const PORT = process.env.PORT || 3000;
 

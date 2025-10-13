@@ -5,7 +5,6 @@ import { UserService } from "../services/userService.js";
 import { comparePassword } from "../utils/hash.js";
 import { generateToken } from "../utils/jwt.js";
 
-
 const userRepository = new UserRepository();
 const userService = new UserService();
 

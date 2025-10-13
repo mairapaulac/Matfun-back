@@ -1,6 +1,8 @@
 import { prisma } from "../prisma/client.js";
 
 export class AchievementRepository {
+
+    
     
     async findAllAchievements() {
         return prisma.achievement.findMany();
@@ -16,7 +18,6 @@ export class AchievementRepository {
         });
     }
     
-
     //associoa uma conquista a um usuário quando desbloqueada
     async unlockAchievement(userId: number, achievementId: number) {
         return prisma.userAchievements.create({
