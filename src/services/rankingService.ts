@@ -1,25 +1,11 @@
-import { prisma } from '../prisma/client.js';
+import { RankingRepository } from '../repositories/rankingRepository.js';
+
+const rankingRepository = new RankingRepository();
 
 class RankingService {
 
   public async getGeneralRanking() {
-    const stats = await prisma.userStats.findMany({
-      // ordena pontuação do maior p/ menor
-      orderBy: {
-        totalScore: 'desc',
-      },
-      // busca 100 users
-      take: 100,
-      // payload retornardo pela consulta
-      include: {
-        user: {
-          select: {
-            userId: true,
-            name: true,
-          },
-        },
-      },
-    });
+    const stats = await rankingRepository.getGeneralRanking();
 
     //formata o ranking 
     const formattedRanking = stats.map((stat, index) => ({
@@ -35,27 +21,7 @@ class RankingService {
   }
 
   public async getClassRanking(classId: number){
-    const stats = await prisma.userStats.findMany({
-        where:{
-            user:{
-                classId 
-            },
-        },
-        orderBy: {
-        totalScore: 'desc',
-      },
-      // busca 100 users
-      take: 100,
-      // payload retornardo pela consulta
-      include: {
-        user: {
-          select: {
-            userId: true,
-            name: true,
-          },
-        },
-      },
-    });
+    const stats = await rankingRepository.getClassRanking(classId);
 
     const formattedRanking = stats.map((stat, index) => ({
       rank: index + 1,

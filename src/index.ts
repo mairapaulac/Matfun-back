@@ -10,12 +10,13 @@ import dashboardRoutes from "./routes/dashboardRoutes.js"
 import supportRoutes from "./routes/supportRoutes.js"
 import matchRoutes from "./routes/matchRoutes.js";
 import authRoutes from "./auth/authRoutes.js";
-
+import rankingRoutes from "./routes/rankingRoutes.js";
 
 dotenv.config();
 const app = express();
 app.use(express.json());
 
+app.use("/ranking", rankingRoutes)
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
 app.use("/achievements", achievementRoutes);
