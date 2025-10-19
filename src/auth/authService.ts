@@ -23,7 +23,16 @@ export class AuthService {
         //gera token jwt 
         const token = generateToken(user.userId);
 
-        return { token, user };
+        return {
+            token,
+            user: {
+                userId: user.userId,
+                name: user.name,
+                email: user.email,
+                gradeName: user.class.grade.gradeName,
+                classLetter: user.class.classLetter,
+            },
+        };
     }
 
     async login(email: string, senha: string) {
@@ -42,7 +51,16 @@ export class AuthService {
 
         const token = generateToken(user.userId);
 
-        return { token, user };
+        return {
+            token,
+            user: {
+                userId: user.userId,
+                name: user.name,
+                email: user.email,
+                gradeName: user.class.grade.gradeName,
+                classLetter: user.class.classLetter,
+            },
+        };
     }
 }
 
