@@ -59,6 +59,7 @@ export class AuthService {
                 email: user.email,
                 gradeName: user.class.grade.gradeName,
                 classLetter: user.class.classLetter,
+                classId: user.classId,
             },
         };
     }
