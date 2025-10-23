@@ -92,10 +92,15 @@ model UserStats {
   // contadores para conquistas
   answeredQuestions Int      @default(0)
   totalCorrect      Int      @default(0)
+  totalErrors       Int      @default(0)
   fractionsCorrect  Int      @default(0)
   geometryCorrect   Int      @default(0)
   algebraCorrect    Int      @default(0)
-
+  percentageCorrect Int      @default(0)
+  //contagem de acertos em cada dificuldade
+  correctByDifficulty1 Int @default(0)
+  correctByDifficulty2 Int @default(0)
+  correctByDifficulty3 Int @default(0)
   // base para sistema de assalto(dias seguidos logado/jogados)
   loginStreak      Int      @default(0)
   lastLoginDate    DateTime? @db.Date // O '?' permite que seja nulo e @db.Date mapeia para o tipo DATE
