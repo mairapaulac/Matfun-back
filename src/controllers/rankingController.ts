@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import rankingService from '../services/rankingService.js';
 
 class RankingController {
-  public async getGeneral(req: Request, res: Response): Promise<Response> {
+  public async getGeneral(_req: Request, res: Response): Promise<Response> {
     try {
         const ranking = await rankingService.getGeneralRanking();
         // retorna status 200 juntamente com os dados

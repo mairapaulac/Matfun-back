@@ -5,7 +5,7 @@ const supportService = new SupportService();
 
 export class SupportController {
 
-  async getAllSchools(res: Response) {
+  async getAllSchools(_req: Request, res: Response) {
     const schools = await supportService.getSchools();
     return res.json(schools);
   }

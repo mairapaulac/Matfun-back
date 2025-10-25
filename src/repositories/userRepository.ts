@@ -8,16 +8,19 @@ export class UserRepository {
     async findByEmail(email: string) {
         return prisma.user.findUnique({ 
             where: { email },
-            include: { stats: true, achievements: true, matches: true, ranking: true} //traz as estatísticas junto se for preciso
+            include: { stats: true, achievements: true, matches: true, ranking: true, class: { include: { grade: true } } } //traz as estatísticas junto se for preciso
         });
     }
 
     async findById(userId: number) {
-        return prisma.user.findUnique( {
+        return prisma.user.findUnique({
             where: { userId },
-            select: { 
-                name: true,
-                email: true, 
+            include: {
+                stats: true,
+                achievements: true,
+                matches: true,
+                ranking: true,
+                class: { include: { grade: true } },
             },
         });
     }
@@ -53,7 +56,7 @@ export class UserRepository {
                     },
                 },
             },
-            include: {stats: true},
+            include: {stats: true, class: { include: { grade: true } } },
         });
     }
 
@@ -76,4 +79,3 @@ export class UserRepository {
         });
     }
 }
-
