@@ -1,5 +1,7 @@
+import { UserStats } from "@prisma/client";
 import { AchievementRepository } from "../repositories/achievementRepository.js";
 import { UserStatsService } from "./userStatsService.js";
+import { AchievementWithProgress } from "../types/achievement.js";
 
 const achievementRepository = new AchievementRepository();
 const userStatsService = new UserStatsService();
@@ -26,24 +28,48 @@ export class AchievementService {
 
   async checkUserAchievements(userId: number) {
     const stats = await userStatsService.getStats(userId);
-    // const allAchievements = await achievementRepository.findAllAchievements();
+    if (!stats) return;
+
+    const allAchievements = await achievementRepository.findAllAchievements();
     const unlocked = await achievementRepository.findByUserId(userId);
+    const unlockedIds = new Set(unlocked.map((ua) => ua.achievementId));
 
-    const unlockedIds = unlocked.map((ua) => ua.achievementId);
+    for (const achievement of allAchievements) {
+      if (unlockedIds.has(achievement.achievementId)) {
+        continue;
+      }
 
-    
-    const rules = [
-      { condition: (stats as any).totalScore >= 1000, id: 1 }, // Pontuação total
-      { condition: (stats as any).totalCorrect >= 50, id: 2 }, // Acertos totais
-      { condition: (stats as any).geometryCorrect >= 20, id: 3 },
-      { condition: (stats as any).algebraCorrect >= 20, id: 4 },
-      { condition: (stats as any).loginStreak >= 7, id: 5 },
-    ];
+      const requiredStat = achievement.requiredStat as keyof UserStats;
+      const requiredValue = achievement.requiredValue;
 
-    for (const rule of rules) {
-      if (rule.condition && !unlockedIds.includes(rule.id)) {
-        await this.unlockAchievement(userId, rule.id);
+      if (requiredStat && requiredValue) {
+        const userValue = stats[requiredStat] as number;
+        if (userValue >= requiredValue) {
+          await this.unlockAchievement(userId, achievement.achievementId);
+        }
       }
     }
+  }
+
+  async getAchievementsWithProgress(userId: number): Promise<AchievementWithProgress[]> {
+    const userStats = await userStatsService.getStats(userId);
+    const allAchievements = await achievementRepository.findAllAchievements();
+    const userAchievements = await achievementRepository.findByUserId(userId);
+    const unlockedAchievementIds = new Set(userAchievements.map(ua => ua.achievementId));
+
+    return allAchievements.map(achievement => {
+      const isUnlocked = unlockedAchievementIds.has(achievement.achievementId);
+      const requiredStat = achievement.requiredStat as keyof UserStats;
+      const requiredValue = achievement.requiredValue || 0;
+      const currentValue = userStats ? (userStats[requiredStat] as number || 0) : 0;
+      const progress = requiredValue > 0 ? Math.min((currentValue / requiredValue) * 100, 100) : 0;
+
+      return {
+        ...achievement,
+        isUnlocked,
+        progress,
+        currentValue,
+      };
+    });
   }
 }

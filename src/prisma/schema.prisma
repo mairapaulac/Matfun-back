@@ -70,6 +70,7 @@ model Achievement {
   requiredValue           Int?
   achievementIcon         String?  // Icon name from a library like Lucide
   achievementCategory     String?  // e.g., "Fractions", "Geometry", "General"
+  iconColor                   String?  
 
   users                   userAchievements[]
 }
@@ -89,7 +90,7 @@ model UserStats {
 
   // ranking geral
   totalScore       Int      @default(0)
-
+  totalErrors      Int      @default(0)
   // contadores para conquistas
   answeredQuestions Int      @default(0)
   totalCorrect      Int      @default(0)
@@ -99,9 +100,9 @@ model UserStats {
   algebraCorrect    Int      @default(0)
   percentageCorrect Int      @default(0)
   //contagem de acertos em cada dificuldade
-  // correctByDifficulty1 Int @default(0)
-  // correctByDifficulty2 Int @default(0)
-  // correctByDifficulty3 Int @default(0)
+  correctByDifficulty1 Int @default(0)
+  correctByDifficulty2 Int @default(0)
+  correctByDifficulty3 Int @default(0)
   // base para sistema de assalto(dias seguidos logado/jogados)
   loginStreak      Int      @default(0)
   lastLoginDate    DateTime? @db.Date // O '?' permite que seja nulo e @db.Date mapeia para o tipo DATE
@@ -112,7 +113,7 @@ model Match {
   scoreGained        Int
   playedAt           DateTime @default(now())
   questionsCorrect   Int
-  questionsIncorrect Int
+  questionsIncorrect Int      @default(0)     
   fractionsQuestions Int      @default(0)
   geometryQuestions  Int      @default(0)
   algebraQuestions   Int      @default(0)

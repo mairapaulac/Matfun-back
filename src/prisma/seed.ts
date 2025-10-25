@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import "dotenv/config";
+import { AchievementService } from "../services/achievementService.js";
 
 const prisma = new PrismaClient();
 
@@ -127,12 +128,45 @@ async function main() {
         `      👤 Gerando ${numStudents} alunos para a turma ${classLetter}...`
       );
 
+      const achievementOptions = [
+        { stat: 'totalCorrect', value: 200 },
+        { stat: 'algebraCorrect', value: 100 },
+        { stat: 'geometryCorrect', value: 100 },
+        { stat: 'fractionsCorrect', value: 100 },
+        { stat: 'percentageCorrect', value: 100 }
+      ];
+
       for (let i = 0; i < numStudents; i++) {
         const baseName = generateRandomName();
-        const name = `${baseName}#${getRandomInt(1000, 9999)}${i}`;
+        const uniqueSuffix = `${turma.classId}-${i}`;
+        const name = `${baseName} ${uniqueSuffix}`;
         const email = `${baseName
           .toLowerCase()
-          .replace(" ", ".")}#${getRandomInt(1000, 9999)}${i}@example.com`;
+          .replace(" ", ".")}.${uniqueSuffix}@example.com`;
+
+        const achievementToGrant = achievementOptions[getRandomInt(0, achievementOptions.length - 1)];
+
+        if (!achievementToGrant) {
+          throw new Error("Falha ao selecionar uma conquista aleatória para o usuário no seed.");
+        }
+        
+        const statsData: any = {
+          totalScore: getRandomInt(100, 5000),
+          totalCorrect: getRandomInt(20, 199),
+          answeredQuestions: getRandomInt(200, 500),
+          loginStreak: getRandomInt(0, 15),
+          algebraCorrect: getRandomInt(5, 99),
+          geometryCorrect: getRandomInt(5, 99),
+          fractionsCorrect: getRandomInt(5, 99),
+          percentageCorrect: getRandomInt(5, 99),
+          lastLoginDate: new Date(),
+        };
+
+        statsData[achievementToGrant.stat] = achievementToGrant.value;
+
+        if (achievementToGrant.stat !== 'totalCorrect' && achievementToGrant.stat.endsWith('Correct')) {
+          statsData.totalCorrect = Math.max(statsData.totalCorrect, statsData[achievementToGrant.stat]);
+        }
 
         const user = await prisma.user.create({
           data: {
@@ -147,16 +181,7 @@ async function main() {
             ),
             classId: turma.classId,
             stats: {
-              create: {
-                totalScore: getRandomInt(100, 5000),
-                totalCorrect: getRandomInt(20, 200),
-                answeredQuestions: getRandomInt(200, 500),
-                loginStreak: getRandomInt(0, 15),
-                algebraCorrect: getRandomInt(5, 50),
-                geometryCorrect: getRandomInt(5, 50),
-                fractionsCorrect: getRandomInt(5, 50),
-                lastLoginDate: new Date(),
-              },
+              create: statsData,
             },
           },
         });
@@ -170,37 +195,89 @@ async function main() {
   await prisma.achievement.createMany({
     data: [
       {
-        achievementName: "Começo Brilhante",
-        achievementDescription: "Complete sua primeira partida.",
+        achievementName: "Guerreiro Matemático",
+        achievementDescription: "Você enfrentou 200 desafios numéricos e saiu vitorioso!",
+        requiredStat: "totalCorrect",
+        requiredValue: 200,
+        achievementIcon: "Sword",
+        achievementCategory:"general",
+        iconColor : "#F43F5E"
       },
       {
-        achievementName: "Gênio da Álgebra",
-        achievementDescription: "Acerte 20 questões de álgebra.",
+        achievementName: "Alquimista da Álgebra",
+        achievementDescription: "Transformou letras em números como um verdadeiro mestre das fórmulas!",
         requiredStat: "algebraCorrect",
-        requiredValue: 20,
+        requiredValue: 100,
+        achievementIcon: "Amphora",
+        achievementCategory:"algebra",
+        iconColor : "#22C55E"
       },
       {
-        achievementName: "Mestre da Geometria",
-        achievementDescription: "Acerte 20 questões de geometria.",
+        achievementName: "Mago das Formas",
+        achievementDescription: "Conhece cada ângulo, círculo e triângulo do reino geométrico!",
         requiredStat: "geometryCorrect",
-        requiredValue: 20,
+        requiredValue: 100,
+        achievementIcon: "WandSparkles",
+        achievementCategory:"geometry",
+        iconColor : "#22D3EE"
       },
       {
-        achievementName: "Foco Total",
-        achievementDescription: "Acesse por 7 dias consecutivos.",
-        requiredStat: "loginStreak",
-        requiredValue: 7,
+        achievementName: "Ninja das Frações",
+        achievementDescription: "Dividiu e conquistou cada parte. A matemática nunca foi tão precisa!",
+        requiredStat: "fractionsCorrect",
+        requiredValue: 100,
+        achievementIcon: "Sparkle",
+        achievementCategory:"fraction",
+        iconColor : "#FACC15"
       },
       {
-        achievementName: "Pontuação Mil",
-        achievementDescription: "Alcance 1000 pontos no total.",
-        requiredStat: "totalScore",
-        requiredValue: 1000,
+        achievementName: "Mestre das Porcentagens",
+        achievementDescription: "Calculou, comparou e multiplicou como um verdadeiro estrategista dos números!",
+        requiredStat: "percentageCorrect",
+        requiredValue: 100,
+        achievementIcon: "GraduationCap",
+        achievementCategory:"percentage",
+        iconColor : "#c76ab3ff"
       },
     ],
   });
 
-  // --- 5. CRIAÇÃO DE PARTIDAS (MATCHES) - LÓGICA ANTIGA RESTAURADA ---
+  // --- 5. CRIAÇÃO DE UM UTILIZADOR ESPECIAL PARA TESTES DE CONQUISTAS ---
+  console.log("🦸 Criando um utilizador especial para testes de conquistas...");
+
+  
+
+  const heroi = await prisma.user.create({
+    data: {
+      name: "Herói das Conquistas",
+      email: "heroi@example.com",
+      senha: senhaHash,
+      dataNascimento: new Date("2010-01-01"),
+      classId: allCreatedUsers[0].classId, // associa à mesma turma do primeiro utilizador
+      stats: {
+        create: {
+          totalScore: 9999,
+          totalCorrect: 250, 
+          answeredQuestions: 300,
+          loginStreak: 20,
+          algebraCorrect: 110, 
+          geometryCorrect: 50,
+          fractionsCorrect: 50,
+          percentageCorrect: 10, 
+          lastLoginDate: new Date(),
+        },
+      },
+    },
+  });
+  allCreatedUsers.push(heroi); 
+
+  console.log("🏅 Verificando e atribuindo conquistas com base nos stats...");
+  const achievementService = new AchievementService();
+  for (const user of allCreatedUsers) {
+    await achievementService.checkUserAchievements(user.userId);
+  }
+
+  // --- 7. CRIAÇÃO DE PARTIDAS (MATCHES) ---
   console.log("🎮 Gerando histórico de partidas específicas...");
   if (allCreatedUsers.length >= 2) {
     const user1 = allCreatedUsers[0]; // Pega o primeiro usuário gerado
