@@ -7,6 +7,6 @@ const controller = new AchievementController();
 
 router.get("/", controller.getAllAchievements);
 router.get("/me/unlocked", authMiddleware, controller.getUserAchievements);
-router.get("/me", controller.getAchievementsWithProgress); //removi o authMiddleware daqui, problema no front
+router.get("/me",authMiddleware, controller.getAchievementsWithProgress); //removi o authMiddleware daqui, problema no front
 
 export default router;
