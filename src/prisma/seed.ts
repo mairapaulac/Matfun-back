@@ -81,111 +81,126 @@ async function main() {
   await prisma.achievement.deleteMany({});
 
   // --- 2. ESTRUTURA DA ESCOLA ---
-  const schoolStructure = {
-    name: "Colégio Estadual Rui Barbosa",
-    grades: [
-      { name: "6º ano", classes: ["A"] },
-      { name: "7º ano", classes: ["A", "B"] },
-      { name: "8º ano", classes: ["A", "B", "C", "D"] },
-      { name: "9º ano", classes: ["A", "B", "C"] },
-    ],
-  };
-
-  // --- 3. CRIAÇÃO DA HIERARQUIA E DOS ALUNOS ---
-  console.log(`🏫 Criando a escola: ${schoolStructure.name}`);
-  const school = await prisma.school.create({
-    data: {
-      schoolId: 1,
-      school_name: schoolStructure.name,
+  const schoolStructures = [
+    {
+      name: "Colégio Estadual Rui Barbosa",
+      grades: [
+        { name: "6º ano", classes: ["A"] },
+        { name: "7º ano", classes: ["A", "B"] },
+        { name: "8º ano", classes: ["A", "B", "C", "D"] },
+        { name: "9º ano", classes: ["A", "B", "C"] },
+      ],
     },
-  });
+    {
+      name: "Outra",
+      grades: [
+        { name: "Outro", classes: ["X"] },
+      ],
+    },
+  ];
 
   const senhaHash = await bcrypt.hash("123456", 10);
   const allCreatedUsers = []; // Array para guardar todos os utilizadores criados
+  let firstClassId: number | undefined;
 
-  for (const gradeData of schoolStructure.grades) {
-    console.log(`  📚 Criando o ano: ${gradeData.name}`);
-    const grade = await prisma.grade.create({
+  let currentSchoolId = 1;
+  for (const schoolStructure of schoolStructures) {
+    console.log(`🏫 Criando a escola: ${schoolStructure.name}`);
+    const school = await prisma.school.create({
       data: {
-        gradeName: gradeData.name,
-        schoolId: school.schoolId,
+        schoolId: currentSchoolId++,
+        school_name: schoolStructure.name,
       },
     });
 
-    for (const classLetter of gradeData.classes) {
-      console.log(
-        `    👩‍🏫 Criando a turma: ${gradeData.name} - Turma ${classLetter}`
-      );
-      const turma = await prisma.class.create({
+    for (const gradeData of schoolStructure.grades) {
+      console.log(`  📚 Criando o ano: ${gradeData.name}`);
+      const grade = await prisma.grade.create({
         data: {
-          classLetter: classLetter,
-          gradeId: grade.gradeId,
+          gradeName: gradeData.name,
+          schoolId: school.schoolId,
         },
       });
 
-      const numStudents = getRandomInt(5, 8);
-      console.log(
-        `      👤 Gerando ${numStudents} alunos para a turma ${classLetter}...`
-      );
-
-      const achievementOptions = [
-        { stat: 'totalCorrect', value: 200 },
-        { stat: 'algebraCorrect', value: 100 },
-        { stat: 'geometryCorrect', value: 100 },
-        { stat: 'fractionsCorrect', value: 100 },
-        { stat: 'percentageCorrect', value: 100 }
-      ];
-
-      for (let i = 0; i < numStudents; i++) {
-        const baseName = generateRandomName();
-        const uniqueSuffix = `${turma.classId}-${i}`;
-        const name = `${baseName} ${uniqueSuffix}`;
-        const email = `${baseName
-          .toLowerCase()
-          .replace(" ", ".")}.${uniqueSuffix}@example.com`;
-
-        const achievementToGrant = achievementOptions[getRandomInt(0, achievementOptions.length - 1)];
-
-        if (!achievementToGrant) {
-          throw new Error("Falha ao selecionar uma conquista aleatória para o usuário no seed.");
-        }
-        
-        const statsData: any = {
-          totalScore: getRandomInt(100, 5000),
-          totalCorrect: getRandomInt(20, 199),
-          answeredQuestions: getRandomInt(200, 500),
-          loginStreak: getRandomInt(0, 15),
-          algebraCorrect: getRandomInt(5, 99),
-          geometryCorrect: getRandomInt(5, 99),
-          fractionsCorrect: getRandomInt(5, 99),
-          percentageCorrect: getRandomInt(5, 99),
-          lastLoginDate: new Date(),
-        };
-
-        statsData[achievementToGrant.stat] = achievementToGrant.value;
-
-        if (achievementToGrant.stat !== 'totalCorrect' && achievementToGrant.stat.endsWith('Correct')) {
-          statsData.totalCorrect = Math.max(statsData.totalCorrect, statsData[achievementToGrant.stat]);
-        }
-
-        const user = await prisma.user.create({
+      for (const classLetter of gradeData.classes) {
+        console.log(
+          `    👩‍🏫 Criando a turma: ${gradeData.name} - Turma ${classLetter}`
+        );
+        const turma = await prisma.class.create({
           data: {
-            name,
-            email,
-            senha: senhaHash,
-            dataNascimento: new Date(
-              `${getRandomInt(2008, 2012)}-${getRandomInt(
-                1,
-                12
-              )}-${getRandomInt(1, 28)}`
-            ),
-            classId: turma.classId,
-            stats: {
-              create: statsData,
-            },
+            classLetter: classLetter,
+            gradeId: grade.gradeId,
           },
         });
-        allCreatedUsers.push(user);
+
+        if (!firstClassId) {
+          firstClassId = turma.classId;
+        }
+
+        const numStudents = getRandomInt(5, 8);
+        console.log(
+          `      👤 Gerando ${numStudents} alunos para a turma ${classLetter}...`
+        );
+
+        const achievementOptions = [
+          { stat: 'totalCorrect', value: 200 },
+          { stat: 'algebraCorrect', value: 100 },
+          { stat: 'geometryCorrect', value: 100 },
+          { stat: 'fractionsCorrect', value: 100 },
+          { stat: 'percentageCorrect', value: 100 }
+        ];
+
+        for (let i = 0; i < numStudents; i++) {
+          const baseName = generateRandomName();
+          const uniqueSuffix = `${turma.classId}-${i}`;
+          const name = `${baseName} ${uniqueSuffix}`;
+          const email = `${baseName
+            .toLowerCase()
+            .replace(" ", ".")}.${uniqueSuffix}@example.com`;
+
+          const achievementToGrant = achievementOptions[getRandomInt(0, achievementOptions.length - 1)];
+
+          if (!achievementToGrant) {
+            throw new Error("Falha ao selecionar uma conquista aleatória para o usuário no seed.");
+          }
+          
+          const statsData: any = {
+            totalScore: getRandomInt(100, 5000),
+            totalCorrect: getRandomInt(20, 199),
+            answeredQuestions: getRandomInt(200, 500),
+            loginStreak: getRandomInt(0, 15),
+            algebraCorrect: getRandomInt(5, 99),
+            geometryCorrect: getRandomInt(5, 99),
+            fractionsCorrect: getRandomInt(5, 99),
+            percentageCorrect: getRandomInt(5, 99),
+            lastLoginDate: new Date(),
+          };
+
+          statsData[achievementToGrant.stat] = achievementToGrant.value;
+
+          if (achievementToGrant.stat !== 'totalCorrect' && achievementToGrant.stat.endsWith('Correct')) {
+            statsData.totalCorrect = Math.max(statsData.totalCorrect, statsData[achievementToGrant.stat]);
+          }
+
+          const user = await prisma.user.create({
+            data: {
+              name,
+              email,
+              senha: senhaHash,
+              dataNascimento: new Date(
+                `${getRandomInt(2008, 2012)}-${getRandomInt(
+                  1,
+                  12
+                )}-${getRandomInt(1, 28)}`
+              ),
+              classId: turma.classId,
+              stats: {
+                create: statsData,
+              },
+            },
+          });
+          allCreatedUsers.push(user);
+        }
       }
     }
   }
@@ -196,9 +211,9 @@ async function main() {
     data: [
       {
         achievementName: "Guerreiro Matemático",
-        achievementDescription: "Você enfrentou 200 desafios numéricos e saiu vitorioso!",
-        requiredStat: "totalCorrect",
-        requiredValue: 200,
+        achievementDescription: "Você acumulou 5000 pontos e provou seu valor!",
+        requiredStat: "totalScore",
+        requiredValue: 5000,
         achievementIcon: "Sword",
         achievementCategory:"general",
         iconColor : "#F43F5E"
@@ -247,13 +262,17 @@ async function main() {
 
   
 
+  if (!firstClassId) {
+    throw new Error("Nenhuma turma foi criada para associar o Herói das Conquistas.");
+  }
+
   const heroi = await prisma.user.create({
     data: {
       name: "Herói das Conquistas",
       email: "heroi@example.com",
       senha: senhaHash,
       dataNascimento: new Date("2010-01-01"),
-      classId: allCreatedUsers[0].classId, // associa à mesma turma do primeiro utilizador
+      classId: firstClassId, // associa à primeira turma criada
       stats: {
         create: {
           totalScore: 9999,
