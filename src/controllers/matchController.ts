@@ -6,22 +6,26 @@ const matchService = new MatchService();
 export class MatchController {
   async registerMatch(req: Request, res: Response) {
     try {
-      const userId = (req as any).user.userId; 
+      const userId = (req as any).user.userId;
       const {
         scoreGained,
         questionsCorrect,
-        fractionsQuestions,
-        geometryQuestions,
-        algebraQuestions,
+        questionsWrong,
+        algebraCorrect,
+        geometryCorrect,
+        fractionsCorrect,
+        percentageCorrect,
       } = req.body;
 
       const match = await matchService.registerMatch({
         userId,
         scoreGained,
         questionsCorrect,
-        fractionsQuestions,
-        geometryQuestions,
-        algebraQuestions,
+        questionsIncorrect: questionsWrong,
+        algebraQuestions: algebraCorrect,
+        geometryQuestions: geometryCorrect,
+        fractionsQuestions: fractionsCorrect,
+        percentageQuestions: percentageCorrect,
       });
 
       return res.status(201).json({

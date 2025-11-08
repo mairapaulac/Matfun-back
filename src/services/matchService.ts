@@ -1,6 +1,7 @@
 import { MatchRepository } from "../repositories/matchRepository.js";
 import { UserStatsService } from "./userStatsService.js";
 import { AchievementService } from "./achievementService.js";
+import { prisma } from "../prisma/client.js";
 
 const matchRepository = new MatchRepository();
 const userStatsService = new UserStatsService();
@@ -11,22 +12,27 @@ export class MatchService {
     userId: number;
     scoreGained: number;
     questionsCorrect: number;
+    questionsIncorrect: number;
     fractionsQuestions: number;
     geometryQuestions: number;
     algebraQuestions: number;
+    percentageQuestions: number;
   }) {
     const { userId } = data;
 
-    // 🔹 Garante que o userStats exista (caso o user seja novo)
     await userStatsService.ensureExists(userId);
 
-    // 🔹 Registra a partida
-    const match = await matchRepository.createMatch(data);
+    const match = await prisma.$transaction(async (tx) => {
+      // 1. Registra a partida
+      const newMatch = await matchRepository.createMatch(data, tx);
 
-    // 🔹 Atualiza os stats do usuário
-    await matchRepository.updateUserStats(userId, data);
+      // 2. Atualiza os stats do usuário
+      await matchRepository.updateUserStats(userId, data, tx);
 
-    // 🔹 Verifica e desbloqueia conquistas, se aplicável
+      return newMatch;
+    });
+
+    // 3. Verifica e desbloqueia conquistas, se aplicável (após a transação)
     await achievementService.checkUserAchievements(userId);
 
     return match;
