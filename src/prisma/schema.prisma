@@ -4,8 +4,11 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+// schema.prisma
+
 generator client {
   provider = "prisma-client-js"
+  seed     = "tsx src/prisma/seed.ts" // Usando tsx
 }
 
 datasource db {
@@ -13,6 +16,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//Criando um enum como um tipo separado, depois disso podemos utilizá-lo como tipo no campo periodo na tabela ranking
 
 enum RankingPeriod {
   DIARIO
@@ -22,14 +26,14 @@ enum RankingPeriod {
 }
 
 model User {
-  userId          Int     @id @default(autoincrement())
-  name            String  @unique //por padrão é NN, se fosse "String?" significaria que o campo poderia ser nulo.
-  email           String  @unique
+  userId          Int      @id @default(autoincrement())
+  name            String   @unique //por padrão é NN, se fosse "String?" significaria que o campo poderia ser nulo.
+  email           String   @unique
   dataNascimento  DateTime      //mapeia para timestamp no postgresql, e os valores que contém o tipo DateTime são tratados como o objeto date no javascript
-  senha           String  @db.VarChar(255)
-  createdAt       DateTime
+  senha           String   @db.VarChar(255)
+  createdAt       DateTime @default(now())
   classId         Int     //Campo escalar para a relação
-  class           Class   @relation(fields: [classId], references: [classId])
+  class           Class    @relation(fields: [classId], references: [classId])
   achievements    userAchievements[] // 1 user - N userAchievements
   stats           UserStats? // Relação 1-para-1 com UserStats
   matches         Match[]    // Relação 1-para-N com Match
@@ -37,7 +41,7 @@ model User {
 }
 
 model Class {
-  classId         Int    @id 
+  classId         Int    @id @default(autoincrement())
   classLetter     String @db.Char(1)
   gradeId         Int
   users           User[] // 1 turma -> N usuários
@@ -45,7 +49,7 @@ model Class {
 }   
 
 model Grade {
-  gradeId         Int    @id
+  gradeId         Int    @id @default(autoincrement())
   gradeName       String
   schoolId        Int
   class           Class[] // 1 ano -> N turmas
@@ -53,17 +57,20 @@ model Grade {
 } 
 
 model School {
-  schoolId        Int @id
+  schoolId        Int @id @default(autoincrement())
   school_name     String
   grade           Grade[] // 1 escola - N anos
 }
+
 model Achievement {
-  achievementId           Int    @id 
+  achievementId           Int    @id @default(autoincrement())
   achievementName         String @db.VarChar(30)
-  achievementDescription  String
-  requiredStat            String @db.VarChar(50)
-  requiredValue           Int
-  // achievementIcon         String @db.VarChar(255) 
+  achievementDescription  String?
+  requiredStat            String? @db.VarChar(50)
+  requiredValue           Int?
+  achievementIcon         String?  // Icon name from a library like Lucide
+  achievementCategory     String?  // e.g., "Fractions", "Geometry", "General"
+  iconColor                   String?  
 
   users                   userAchievements[]
 }
@@ -75,31 +82,42 @@ model userAchievements {
   achievement         Achievement @relation(fields: [achievementId], references: [achievementId])
   user                User @relation(fields: [userId], references: [userId])
 }
+
+
 model UserStats {
   userId           Int      @id // A Chave Primária (PK) é também a Chave Estrangeira (FK)
   user             User     @relation(fields: [userId], references: [userId])
 
   // ranking geral
   totalScore       Int      @default(0)
-
+  totalErrors      Int      @default(0)
   // contadores para conquistas
-  totalCorrect     Int      @default(0)
-  fractionsCorrect Int      @default(0)
-  geometryCorrect  Int      @default(0)
-  algebraCorrect   Int      @default(0)
-
+  answeredQuestions Int      @default(0)
+  totalCorrect      Int      @default(0)
+  totalIncorrect       Int      @default(0)
+  fractionsCorrect  Int      @default(0)
+  geometryCorrect   Int      @default(0)
+  algebraCorrect    Int      @default(0)
+  percentageCorrect Int      @default(0)
+  //contagem de acertos em cada dificuldade
+  correctByDifficulty1 Int @default(0)
+  correctByDifficulty2 Int @default(0)
+  correctByDifficulty3 Int @default(0)
   // base para sistema de assalto(dias seguidos logado/jogados)
   loginStreak      Int      @default(0)
   lastLoginDate    DateTime? @db.Date // O '?' permite que seja nulo e @db.Date mapeia para o tipo DATE
 }
+
 model Match {
   matchId            Int      @id @default(autoincrement())
   scoreGained        Int
   playedAt           DateTime @default(now())
   questionsCorrect   Int
+  questionsIncorrect Int      @default(0)     
   fractionsQuestions Int      @default(0)
   geometryQuestions  Int      @default(0)
   algebraQuestions   Int      @default(0)
+  percentageQuestions Int     @default(0)
   userId             Int
   user               User     @relation(fields: [userId], references: [userId])
 
