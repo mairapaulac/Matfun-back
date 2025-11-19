@@ -27,7 +27,7 @@ Siga as instruções abaixo para configurar e executar o projeto em seu ambiente
 
 1.  Clone o repositório:
     ```bash
-    git clone https://github.com/seu-usuario/matfun-backend.git
+    git clone https://github.com/mairapaulac/Matfun-back.git
     ```
 2.  Navegue até o diretório do projeto:
     ```bash
@@ -47,7 +47,7 @@ Siga as instruções abaixo para configurar e executar o projeto em seu ambiente
 
 1.  Aplique as migrações do banco de dados para criar as tabelas:
     ```bash
-    npx prisma migrate dev
+    npx prisma migrate dev --schema=\src\prisma\prisma.schema
     ```
 2.  (Opcional) Popule o banco de dados com dados iniciais:
     ```bash
